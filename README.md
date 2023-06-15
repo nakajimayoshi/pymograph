@@ -33,8 +33,6 @@ You can adjust the "column_range" parameter to adjust how smooth you want the ca
 
 ## Methodology 
 
-Sure, here is an API-style documentation for your `Kymograph` class:
-
 ---
 
 # Class: Kymograph
