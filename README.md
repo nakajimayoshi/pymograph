@@ -6,6 +6,8 @@
 ## Overview 
 Pymograph takes in raw data from the PNG data of Kymographs, and generates quantitative graphs to map increases in light intensity. You can generate these Kymographs using a tool like [Fiji (aka ImageJ)](https://imagej.net/software/fiji/)
 
+If you have any questions or find any issues/bugs please report them in the [issues tab](https://github.com/nakajimayoshi/pymograph/issues)
+
 ## Instructions
 
 Requirements: 
