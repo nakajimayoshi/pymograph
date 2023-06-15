@@ -28,6 +28,9 @@ Requirements:
 
 You will find your results in the "graphs" directory as well as a .csv file in the root directory with the raw averaged data. 
 
+### Optional 
+You can adjust the "column_range" parameter to adjust how smooth you want the captured rolling average to be. E.g. setting it to 5 results in finding the largest increase across 5 frames.
+
 ## Methodology 
 
 Sure, here is an API-style documentation for your `Kymograph` class:
