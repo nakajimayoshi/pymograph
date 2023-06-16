@@ -4,3 +4,5 @@ venv/
 __pychache__/
 *.pyc
 *.log
+*.png
+*.csv
