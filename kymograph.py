@@ -94,47 +94,71 @@ class Kymograph:
                 csvwriter.writerow(row)
 
         print(f"Intensity averages data saved to {csv_filename}.")
-
-    def graph_averages(self, image: str):
-        img = Image.open(image)  # convert image to grayscale
-        img_data = np.asarray(img)
-
-        averages = self.flatten(img_data)
-        max_column = self.max_increase_column(averages)
-        averages_2d = averages.reshape(1, -1)
-
-        # Create a figure
-        fig = plt.figure(figsize=(10, 8))
-        fig.suptitle(f"Image: {os.path.basename(image)}")
-
-        # Create the first subplot for the averages_2d image
-        ax1 = fig.add_subplot(2, 1, 1)
-        ax1.imshow(averages_2d, cmap='gray')
-        ax1.set_yticklabels([])  # remove y-axis labels
-
-        # Create the second subplot for the averages plot
-        ax2 = fig.add_subplot(2, 1, 2)
-        ax2.plot(averages)
-        ax2.set_title("Average Intensity")
-
-        # Add a transparent rectangle to highlight the region of the maximum increase
-        rect = patches.Rectangle((max_column, min(averages)), self.column_range, max(averages) - min(averages),
-                                 linewidth=1, edgecolor='r', facecolor='r', alpha=0.5)
-        ax2.add_patch(rect)
-
-        plt.xticks(rotation=45)
-
-        # Save the figure to the graphs directory
-        plt.savefig(f"graphs/graph_{os.path.basename(image)}")
-
     def generate_intensity_graphs(self, image_folder: str):
         if not os.path.exists('graphs'):
             os.makedirs('graphs')
+
+        # Create a figure and axes outside of the loop
+        fig = plt.figure(figsize=(10, 8))
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2)
+
+        first_image = True  # flag to check if it's the first image
 
         for image in os.listdir(image_folder):
             try:
                 print(f"Processing image: {image}")
                 self.logger.info(f"Processing image: {image}")
-                self.graph_averages(f"{image_folder}/{image}")
+
+                img = Image.open(f"{image_folder}/{image}")  # convert image to grayscale
+                img_data = np.asarray(img)
+
+                averages = self.flatten(img_data)
+                max_column = self.max_increase_column(averages)
+                averages_2d = averages.reshape(1, -1)
+
+                # Plot the averages_2d image and the averages line on the same axes
+                ax1.imshow(averages_2d, cmap='gray')
+                ax1.set_yticks([])
+                ax1.set_title('1D Flattened Averages')
+
+                line, = ax2.plot(averages, label=os.path.basename(image))  # add a label for each line
+                line_color = line.get_color()  # get the color of the line
+
+                ax2.set_title("Intensity over epoch")
+                ax2.set_xlabel('Frame')  # set x-axis label for this subplot
+                ax2.set_ylabel('Intensity (gray level)')  # set y-axis label for this subplot
+
+                # Add a transparent rectangle to highlight the region of the maximum increase
+                rect = patches.Rectangle((max_column, min(averages)), self.column_range, max(averages) - min(averages),
+                                         linewidth=1, edgecolor=line_color, facecolor=line_color,
+                                         alpha=0.5)  # use the color of the line
+                ax2.add_patch(rect)
+
+                # Add a label to the rectangle only for the first image
+                if first_image:
+                    ax2.text(max_column + self.column_range / 2 + 30, min(averages), f"smoothed range = {self.column_range}",
+                             horizontalalignment='center', verticalalignment='bottom')
+                    first_image = False  # set the flag to False after the first image
+
+                ax2.xaxis.set_tick_params(rotation=45)  # rotate x-axis labels for this subplot
+
             except Exception as e:
                 self.logger.error(f"Failed to process image: {image}. Error: {e}")
+
+        # Add a legend and save the figure after all lines have been plotted
+        ax2.legend()
+        plt.savefig("graphs/overlayed_graph.png")
+
+    # def generate_intensity_graphs(self, image_folder: str):
+    #     if not os.path.exists('graphs'):
+    #         os.makedirs('graphs')
+    #
+    #     for image in os.listdir(image_folder):
+    #         try:
+    #             print(f"Processing image: {image}")
+    #             self.logger.info(f"Processing image: {image}")
+    #             self.graph_averages(f"{image_folder}/{image}")
+    #         except Exception as e:
+    #             self.logger.error(f"Failed to process image: {image}. Error: {e}")
+
